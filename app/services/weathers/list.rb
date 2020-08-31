@@ -32,8 +32,7 @@ module Weathers
         temperature = JSON.parse(weather["temperature"]).map(&:to_f)
 
         weather
-          .as_json
-          .except("location_id")
+          .as_json(except: [:location_id], include: { location: { except: [:id] } })
           .merge({ "temperature" => temperature })
       end
     end
