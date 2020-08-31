@@ -41,6 +41,9 @@ gem 'rspec-rails'
 
 gem 'active_model_serializers'
 
+gem 'dry-validation'
+gem 'dry-monads'
+
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug'

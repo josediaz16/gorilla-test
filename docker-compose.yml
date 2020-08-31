@@ -1,0 +1,17 @@
+version: '3.2'
+services:
+  web:
+    build: .
+    command:
+      - default
+    ports:
+      - 8000:8000
+    volumes:
+      - .:/app
+      - gems:/usr/local/bundle
+    stdin_open: true
+    tty: true
+
+
+volumes:
+  gems:
