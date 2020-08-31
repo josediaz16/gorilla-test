@@ -9,50 +9,48 @@ module Weathers
     end
 
     def call
-      filter
-        .fmap { |weathers| serialize(weathers) }
+      if filtering_by_location?
+        filter_by_location
+      elsif params.present?
+        filter_only_by_date
+      else
+        Success(basic_query)
+      end
     end
 
     private
-
-    def filter
-      if filtering_by_location?
-        filter_by_location
-      else
-        weathers = Weather
-          .where(weather_filters)
-          .order(id: :asc)
-
-        Success(weathers)
-      end
-    end
-
-    def serialize(weathers)
-      weathers.map do |weather|
-        temperature = JSON.parse(weather["temperature"]).map(&:to_f)
-
-        weather
-          .as_json(except: [:location_id], include: { location: { except: [:id] } })
-          .merge({ "temperature" => temperature })
-      end
-    end
 
     def filtering_by_location?
       params.key?(:lat) || params.key?(:lon)
     end
 
+    def filter_only_by_date
+      weathers = basic_query
+
+      if weathers.any?
+        Success(weathers)
+      else
+        Failure({ date: 'Nothing found on that date' })
+      end
+
+    end
+
     def filter_by_location
-      weathers = Weather
+      weathers = basic_query
         .joins(:location)
         .where(locations: {lat: params[:lat], lon: params[:lon]})
-        .where(weather_filters)
-        .order(id: :asc)
 
       if weathers.any?
         Success(weathers)
       else
         Failure({ location: 'The location does not exist' })
       end
+    end
+
+    def basic_query
+      Weather
+        .where(weather_filters)
+        .order(id: :asc)
     end
 
     def weather_filters

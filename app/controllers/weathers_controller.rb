@@ -4,7 +4,8 @@ class WeathersController < ApplicationController
     result = Weathers::List.new(list_params).call
 
     if result.success?
-      render json: result.success, status: :ok
+      weathers = result.success
+      render json: weathers, include: ['location'], status: :ok
     else
       render json: result.failure, status: :not_found
     end
